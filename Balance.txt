@@ -1,1 +1,8 @@
-2023-11-27 	 Deposit 	 500
+2023-11-28 	 Deposit 	 500
+2023-11-28 	 Withdrawal 	 -100
+2023-11-29 	 Withdrawal 	 -100
+
+2023-11-29 	 Withdrawal 	 -100
+2023-11-29 	 Deposit 	 500
+2023-11-29 	 Withdrawal 	 -200
+2023-11-29 	 Deposit 	 500

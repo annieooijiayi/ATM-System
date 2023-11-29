@@ -2,23 +2,83 @@
 #include <stdlib.h>
 #include <time.h>
 
-void checkBalance(FILE *file, const char *today){
+int checkBalance(){
+    FILE *file;
+    file = fopen("Balance.txt", "r");
+    if (file == NULL){
+        file =  fopen("Balance.txt", "w");
+        if (file == NULL){
+            printf("Error opening the file. \n");
+            return 1;
+        }
+    }
+
+    rewind(file);
+
+    int balance = 0, amount;
+    char date[10];
+    char type[20];
+
+    while (fscanf(file, " %[^\t] \t %[^\t] \t %d", date, type, &amount) == 3) {
+        balance += amount;
+    }
+    fclose(file);
+    return balance;
 
 }
 
-void withdrawal(FILE *file, const char *today){
-    int amount;
+void withdrawal(const char *today){
+    int amount, balance;
+    FILE *file;
+
+    balance = checkBalance();
+
+    file = fopen("Balance.txt", "a");
+    if (file == NULL){
+        file =  fopen("Balance.txt", "w");
+        if (file == NULL){
+            printf("Error opening the file. \n");
+            return 1;
+        }
+    }
 
     printf("Enter the amount that you wish to withdraw: ");
 
-    while(scanf("%d", &amount) != 1 || amount <= 0){
-        printf("Invalid amount. Please try again with positive numbers.\n");
-        printf("Enter the amount that you wish to withdraw: ");
+    while (1){
+        while (getchar() != '\n');
+
+        if (scanf("%d", &amount) != 1 || amount <= 0){
+            printf("Invalid amount. Please try again with positive numbers.\n");
+            printf("Enter the amount that you wish to withdraw: ");
+            continue;
+        }
+
+        if (amount > balance){
+            printf("Insufficient balance. Please try again. \n");
+            printf("Enter the amount that you wish to withdraw: ");
+        }else{
+            break;
+        }
     }
+
+    fprintf(file, "%s \t Withdrawal \t %d\n", today, -amount);
+    printf("You have withdrawn RM %d.\n", amount);
+    fclose(file);
 }
 
-void deposit(FILE *file, const char *today){
+void deposit(const char *today){
     int amount;
+    FILE *file;
+
+    file = fopen("Balance.txt", "a");
+    if (file == NULL){
+        file =  fopen("Balance.txt", "w");
+        if (file == NULL){
+            printf("Error opening the file. \n");
+            return 1;
+        }
+    }
+
     printf("Enter the amount that you wish to deposit: ");
 
     while(scanf("%d", &amount) != 1 || amount <= 0){
@@ -26,15 +86,15 @@ void deposit(FILE *file, const char *today){
         printf("Enter the amount that you wish to deposit: ");
     }
 
-    fprintf(file, "%s \t Deposit \t %d\n", today, amount);
-
+    fprintf(file, "%s \t Deposit \t %d\n", today, +amount);
+    printf("You have deposited RM %d.\n", amount);
+    fclose(file);
 
 }
 
 int main()
 {
-    int pin = 123456, inputPin, count = 0, continueTrans = 1, option;
-    FILE *file;
+    int pin = 123456, inputPin, count = 0, continueTrans = 1, option, balance;
     time_t now;
     time(&now);
 
@@ -62,44 +122,43 @@ int main()
         }
     }
 
-    printf(" ===== Menu ===== \n");
-    printf("[1] Check balance\n");
-    printf("[2] Withdrawal\n");
-    printf("[3] Deposit\n");
-    printf("[4] Exit\n");
-    printf("Please select an option: ");
-    scanf("%d", &option);
-
-    while(option < 1 || option > 4){
-        printf("Invalid input. Please try again with 1, 2, 3 or 4.\n");
+    do {
+        printf(" ===== Menu ===== \n");
+        printf("[1] Check balance\n");
+        printf("[2] Withdrawal\n");
+        printf("[3] Deposit\n");
+        printf("[4] Exit\n");
         printf("Please select an option: ");
         scanf("%d", &option);
-    }
 
-    file = fopen("Balance.txt", "a");
-    if (file == NULL){
-        file =  fopen("Balance.txt", "w");
-        if (file == NULL){
-            printf("Error opening the file. \n");
-            return 1;
+        while(option < 1 || option > 4){
+            printf("Invalid input. Please try again with 1, 2, 3 or 4.\n");
+            printf("Please select an option: ");
+            scanf("%d", &option);
         }
-    }
 
-    switch (option){
-    case 1:
-        checkBalance(file, today);
-        break;
+        switch (option){
+        case 1:
+            balance = checkBalance();
+            printf("Your account balance: RM %d\n", balance);
+            break;
 
-    case 2:
-        withdrawal(file, today);
-        break;
+        case 2:
+            withdrawal(today);
+            break;
 
-    case 3:
-        deposit(file, today);
-        break;
+        case 3:
+            deposit(today);
+            break;
 
-    }
-    fclose(file);
+        case 4:
+            printf("See you next time!");
+            break;
+
+        }
+
+    }while (option != 4);
+
 
 return 0;
 
